@@ -1,4 +1,4 @@
-package com.example.projectfilm.ui.user.movie;
+package com.example.projectfilm.data.viewmodels.user.movie;
 
 public class MovieViewModel {
 }

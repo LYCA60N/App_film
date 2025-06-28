@@ -1,66 +1,115 @@
 package com.example.projectfilm;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.view.Menu;
+import android.view.MenuItem;
 
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 
-import com.example.projectfilm.databinding.ActivityMainBinding;
+import com.example.projectfilm.ui.user.home.HomeFragment;
+import com.example.projectfilm.ui.user.movie.MovieListFragment;
+import com.example.projectfilm.ui.user.profile.ProfileActivity;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
+import com.example.projectfilm.ui.auth.LoginActivity;
 
-public class MainActivity extends AppCompatActivity {
 
-    private AppBarConfiguration mAppBarConfiguration;
-    private ActivityMainBinding binding;
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main); // đảm bảo activity_main có DrawerLayout
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        drawerLayout = findViewById(R.id.drawerLayout);
+        navigationView = findViewById(R.id.navigation_view); // từ layout
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
 
-        setSupportActionBar(binding.appBarMain.toolbar);
-        binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null)
-                        .setAnchorView(R.id.fab).show();
+        // Gắn toggle để mở/đóng drawer (nếu dùng icon menu)
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        // Gắn listener cho NavigationView (drawer menu)
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Mở HomeFragment mặc định
+        if (savedInstanceState == null) {
+            openFragment(new HomeFragment());
+        }
+
+        // Xử lý BottomNavigationView
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.menu_home) {
+                openFragment(new HomeFragment());
+                return true;
+            } else if (id == R.id.menu_favorite) {
+                openFragment(new MovieListFragment()); // có thể là danh sách tất cả phim
+                return true;
+            } else if (id == R.id.menu_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                return true;
             }
+
+            return false;
         });
-        DrawerLayout drawer = binding.drawerLayout;
-        NavigationView navigationView = binding.navView;
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
-                .setOpenableLayout(drawer)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.nav_login) {
+            startActivity(new Intent(this, LoginActivity.class));
+        } else if (id == R.id.nav_logout) {
+            startActivity(new Intent(this, LoginActivity.class)); // Hoặc FirebaseAuth.getInstance().signOut();
+        } else if (id == R.id.nav_now_showing) {
+            openFragment(MovieListFragment.newInstance("status", "Đang chiếu"));
+        } else if (id == R.id.nav_coming_soon) {
+            openFragment(MovieListFragment.newInstance("status", "Sắp chiếu"));
+        } else if (id == R.id.nav_horror) {
+            openFragment(MovieListFragment.newInstance("genre", "Kinh dị"));
+        } else if (id == R.id.nav_action) {
+            openFragment(MovieListFragment.newInstance("genre", "Hành động"));
+        } else if (id == R.id.nav_animation) {
+            openFragment(MovieListFragment.newInstance("genre", "Hoạt hình"));
+        }
+        Fragment selectedFragment = null;
+
+
+        if (selectedFragment != null) {
+            openFragment(selectedFragment);
+        }
+
+        drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
+    public void openFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
     @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-                || super.onSupportNavigateUp();
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 }

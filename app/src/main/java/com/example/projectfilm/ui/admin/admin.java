@@ -1,6 +1,8 @@
 package com.example.projectfilm.ui.admin;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.projectfilm.R;
 
 public class admin extends AppCompatActivity {
+    ImageView btn_manage_movies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,5 +25,12 @@ public class admin extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        btn_manage_movies = findViewById(R.id.btn_manage_movies);
+        btn_manage_movies.setOnClickListener(v -> {
+            Intent intent = new Intent(admin.this, MovieManage.class);
+            startActivity(intent);
+        });
+
+
     }
 }

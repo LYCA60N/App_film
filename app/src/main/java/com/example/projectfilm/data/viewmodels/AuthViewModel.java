@@ -1,8 +1,8 @@
-package com.example.projectfilm.viewmodels;
+package com.example.projectfilm.data.viewmodels;
 
-import com.google.firebase.auth.FirebaseAuthException;
+
 
 public class AuthViewModel {
-    private FirebaseAuth firebaseAuth;
+
 
 }
